@@ -19,7 +19,7 @@ library(stringr)
 
 ### Data Processing
 
-```{r data_fetching}
+```{r data_reading}
 customers_data <- read.csv("brazilian-ecommerce/olist_customers_dataset.csv")
 geolocation_data <- read.csv("brazilian-ecommerce/olist_geolocation_dataset.csv")
 items_data <- read.csv("brazilian-ecommerce/olist_order_items_dataset.csv")
@@ -27,8 +27,48 @@ payments_data <- read.csv("brazilian-ecommerce/olist_order_payments_dataset.csv"
 reviews_data <- read.csv("brazilian-ecommerce/olist_order_reviews_dataset.csv")
 orders_data <- read.csv("brazilian-ecommerce/olist_orders_dataset.csv")
 products_data <- read.csv("brazilian-ecommerce/olist_products_dataset.csv")
-sellers_Data <- read.csv("brazilian-ecommerce/olist_sellers_dataset.csv")
+sellers_data <- read.csv("brazilian-ecommerce/olist_sellers_dataset.csv")
 translations_Data <- read.csv("brazilian-ecommerce/product_category_name_translation.csv")
+```
+
+```{r data_cleaning}
+create_column_mapping <- function(old_column, new_column, dataframe, filename) {
+  if(new_column %in% colnames(dataframe))
+  {
+    return(dataframe)
+  }
+  column1 <- as.factor(seq.int(nrow(unique(dataframe[old_column]))))
+  column2 <- unique(dataframe[old_column])
+  mapping <- data.frame(column1, column2)
+  names(mapping) <- c(new_column, old_column)
+  dataframe <- dataframe %>% left_join(mapping, by = old_column) %>% select(-old_column)
+  write.csv(mapping, filename, row.names=FALSE)  
+  return(dataframe)
+}
+
+implement_mapping <- function(dataframe, column_name){
+  mapping <- switch(column_name, 
+                    "order_id" = read.csv("brazilian-ecommerce/olist_orders_translation_dataset.csv"),
+                    "customer_id" = read.csv("brazilian-ecommerce/olist_customers_translation_dataset.csv"),
+                    "product_id" = read.csv("brazilian-ecommerce/olist_products_translation_dataset.csv"),
+                    "seller_id" = read.csv("brazilian-ecommerce/olist_sellers_translation_dataset.csv")) 
+  df <- dataframe %>% left_join(mapping, by = column_name) %>% select(-column_name)
+  rm(mapping)
+  return(df)
+}
+
+customers_data <- create_column_mapping("customer_id", "customer_ID", customers_data, "brazilian-ecommerce/olist_customers_translation_dataset.csv")
+orders_data <- create_column_mapping("order_id", "order_ID", orders_data, "brazilian-ecommerce/olist_orders_translation_dataset.csv")
+products_data <- create_column_mapping("product_id", "product_ID", products_data, "brazilian-ecommerce/olist_products_translation_dataset.csv")
+sellers_data <- create_column_mapping("seller_id", "seller_ID", sellers_data, "brazilian-ecommerce/olist_sellers_translation_dataset.csv")
+reviews_data <- create_column_mapping("review_id", "review_ID", reviews_data, "brazilian-ecommerce/olist_reviews_translation_dataset.csv")
+
+reviews_data <- implement_mapping(reviews_data, "order_id")
+payments_data <- implement_mapping(payments_data, "order_id")
+items_data <- implement_mapping(items_data, "order_id")
+orders_data <- implement_mapping(orders_data, "customer_id")
+items_data <- implement_mapping(items_data, "product_id")
+items_data <- implement_mapping(items_data, "seller_id")
 ```
 
 ### Data Manipulation
@@ -43,9 +83,7 @@ translations_Data <- read.csv("brazilian-ecommerce/product_category_name_transla
 ```
 
 ```{r Priyal}
-print("Testing")
-print("Priyal")
-print("Scoooby Dooby Doooooooooo")
+
 ```
 
 
