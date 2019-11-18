@@ -83,7 +83,7 @@ items_data <- implement_mapping(items_data, "seller_id")
 ### Exploratory Data Analysis
 ```{r sonal}
 custtable <- left_join(customers_data, orders_data)
-
+qahm
 
 ```
 
