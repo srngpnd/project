@@ -37,7 +37,18 @@ translations_Data <- read.csv("brazilian-ecommerce/product_category_name_transla
 
 ```
 
+### Exploratory Data Analysis
 ```{r sonal}
 
 ```
 
+```{r Priyal}
+print("Testing")
+print("Priyal")
+print("Scoooby Dooby Doooooooooo")
+```
+
+
+```{r Harshita}
+
+```
