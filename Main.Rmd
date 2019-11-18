@@ -40,7 +40,7 @@ translations_Data <- read.csv("brazilian-ecommerce/product_category_name_transla
 ### Exploratory Data Analysis
 ```{r sonal}
 custtable <- left_join(customers_data, orders_data)
-
+qahm
 
 ```
 
