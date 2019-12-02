@@ -15,8 +15,12 @@ knitr::opts_chunk$set(echo = TRUE)
 library(ggplot2)
 library(dplyr)
 library(stringr)
+<<<<<<< Updated upstream
 library(plotly)
+library(lubridate)
+=======
 library(tidyverse)
+library(plotly)
 library(geobr)
 library(rnaturalearth)
 library(rnaturalearthdata)
@@ -24,6 +28,7 @@ library(rgeos)
 library(lubridate)
 
 
+>>>>>>> Stashed changes
 ```
 
 ### Data Processing
@@ -37,9 +42,13 @@ reviews_data <- read.csv("brazilian-ecommerce/olist_order_reviews_dataset.csv")
 orders_data <- read.csv("brazilian-ecommerce/olist_orders_dataset.csv")
 products_data <- read.csv("brazilian-ecommerce/olist_products_dataset.csv")
 sellers_data <- read.csv("brazilian-ecommerce/olist_sellers_dataset.csv")
+<<<<<<< Updated upstream
 translations_data <- read.csv("brazilian-ecommerce/product_category_name_translation.csv")
 brazil_holidays_data <- read.csv("brazilian-ecommerce/brazil_holidays.csv")
+=======
+translations_Data <- read.csv("brazilian-ecommerce/product_category_name_translation.csv")
 state <- read_state(code_state="all", year=2018) 
+>>>>>>> Stashed changes
 ```
 
 ```{r data_cleaning}
@@ -90,6 +99,10 @@ items_data <- implement_mapping(items_data, "seller_id")
 
 ### Exploratory Data Analysis
 ```{r sonal}
+<<<<<<< Updated upstream
+custtable <- left_join(customers_data, orders_data)
+qahm
+=======
 geo_data <-  distinct(geolocation_data,geolocation_state,geolocation_zip_code_prefix,geolocation_city, .keep_all = TRUE)
 ordertable <- plyr::join(orders_data,customers_data, by= "customer_ID")
 ordergeotable <- left_join(ordertable,geo_data, by= c("customer_zip_code_prefix"="geolocation_zip_code_prefix","customer_state"="geolocation_state", "customer_city"="geolocation_city"))
@@ -137,6 +150,7 @@ odtbl <- ordertable %>% select_at(vars(year, month, customer_unique_id)) %>%
   ggplot() + geom_line(mapping = aes(x = month, y = n, group = 1, color="red"),show.legend = FALSE) +facet_wrap(~year)+geom_point(mapping = aes(x = month, y = n, group = 1, color="red",show.legend=FALSE),show.legend = FALSE)+labs(x="Month", y="Count of new customers added each month", title = "New customers purchased every consecutive month")
 
 ggplotly(odtbl)
+>>>>>>> Stashed changes
 
 ```
 
