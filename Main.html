@@ -374,11 +374,11 @@ summary {
 <pre class="r"><code>library(ggplot2)
 library(dplyr)</code></pre>
 <pre><code>## 
-## Attaching package: &#39;dplyr&#39;</code></pre>
-<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## Attaching package: 'dplyr'</code></pre>
+<pre><code>## The following objects are masked from 'package:stats':
 ## 
 ##     filter, lag</code></pre>
-<pre><code>## The following objects are masked from &#39;package:base&#39;:
+<pre><code>## The following objects are masked from 'package:base':
 ## 
 ##     intersect, setdiff, setequal, union</code></pre>
 <pre class="r"><code>library(stringr)</code></pre>
@@ -392,20 +392,55 @@ payments_data &lt;- read.csv(&quot;brazilian-ecommerce/olist_order_payments_data
 reviews_data &lt;- read.csv(&quot;brazilian-ecommerce/olist_order_reviews_dataset.csv&quot;)
 orders_data &lt;- read.csv(&quot;brazilian-ecommerce/olist_orders_dataset.csv&quot;)
 products_data &lt;- read.csv(&quot;brazilian-ecommerce/olist_products_dataset.csv&quot;)
-sellers_Data &lt;- read.csv(&quot;brazilian-ecommerce/olist_sellers_dataset.csv&quot;)
+sellers_data &lt;- read.csv(&quot;brazilian-ecommerce/olist_sellers_dataset.csv&quot;)
 translations_Data &lt;- read.csv(&quot;brazilian-ecommerce/product_category_name_translation.csv&quot;)</code></pre>
+<pre class="r"><code>create_column_mapping &lt;- function(old_column, new_column, dataframe, filename) {
+  if(new_column %in% colnames(dataframe))
+  {
+    return(dataframe)
+  }
+  column1 &lt;- as.factor(seq.int(nrow(unique(dataframe[old_column]))))
+  column2 &lt;- unique(dataframe[old_column])
+  mapping &lt;- data.frame(column1, column2)
+  names(mapping) &lt;- c(new_column, old_column)
+  dataframe &lt;- dataframe %&gt;% left_join(mapping, by = old_column) %&gt;% select(-old_column)
+  write.csv(mapping, filename, row.names=FALSE)  
+  return(dataframe)
+}
+
+implement_mapping &lt;- function(dataframe, column_name){
+  mapping &lt;- switch(column_name, 
+                    &quot;order_id&quot; = read.csv(&quot;brazilian-ecommerce/olist_orders_translation_dataset.csv&quot;),
+                    &quot;customer_id&quot; = read.csv(&quot;brazilian-ecommerce/olist_customers_translation_dataset.csv&quot;),
+                    &quot;product_id&quot; = read.csv(&quot;brazilian-ecommerce/olist_products_translation_dataset.csv&quot;),
+                    &quot;seller_id&quot; = read.csv(&quot;brazilian-ecommerce/olist_sellers_translation_dataset.csv&quot;)) 
+  df &lt;- dataframe %&gt;% left_join(mapping, by = column_name) %&gt;% select(-column_name)
+  rm(mapping)
+  return(df)
+}
+
+customers_data &lt;- create_column_mapping(&quot;customer_id&quot;, &quot;customer_ID&quot;, customers_data, &quot;brazilian-ecommerce/olist_customers_translation_dataset.csv&quot;)
+orders_data &lt;- create_column_mapping(&quot;order_id&quot;, &quot;order_ID&quot;, orders_data, &quot;brazilian-ecommerce/olist_orders_translation_dataset.csv&quot;)
+products_data &lt;- create_column_mapping(&quot;product_id&quot;, &quot;product_ID&quot;, products_data, &quot;brazilian-ecommerce/olist_products_translation_dataset.csv&quot;)
+sellers_data &lt;- create_column_mapping(&quot;seller_id&quot;, &quot;seller_ID&quot;, sellers_data, &quot;brazilian-ecommerce/olist_sellers_translation_dataset.csv&quot;)
+reviews_data &lt;- create_column_mapping(&quot;review_id&quot;, &quot;review_ID&quot;, reviews_data, &quot;brazilian-ecommerce/olist_reviews_translation_dataset.csv&quot;)
+
+reviews_data &lt;- implement_mapping(reviews_data, &quot;order_id&quot;)
+payments_data &lt;- implement_mapping(payments_data, &quot;order_id&quot;)</code></pre>
+<pre><code>## Warning: Column `order_id` joining factors with different levels, coercing
+## to character vector</code></pre>
+<pre class="r"><code>items_data &lt;- implement_mapping(items_data, &quot;order_id&quot;)</code></pre>
+<pre><code>## Warning: Column `order_id` joining factors with different levels, coercing
+## to character vector</code></pre>
+<pre class="r"><code>orders_data &lt;- implement_mapping(orders_data, &quot;customer_id&quot;)
+items_data &lt;- implement_mapping(items_data, &quot;product_id&quot;)
+items_data &lt;- implement_mapping(items_data, &quot;seller_id&quot;)</code></pre>
 </div>
 <div id="data-manipulation" class="section level3">
 <h3>Data Manipulation</h3>
 </div>
 <div id="exploratory-data-analysis" class="section level3">
 <h3>Exploratory Data Analysis</h3>
-<pre class="r"><code>print(&quot;Testing&quot;)</code></pre>
-<pre><code>## [1] &quot;Testing&quot;</code></pre>
-<pre class="r"><code>print(&quot;Priyal&quot;)</code></pre>
-<pre><code>## [1] &quot;Priyal&quot;</code></pre>
-<pre class="r"><code>print(&quot;Scoooby Dooby Doooooooooo&quot;)</code></pre>
-<pre><code>## [1] &quot;Scoooby Dooby Doooooooooo&quot;</code></pre>
 </div>
 
 
