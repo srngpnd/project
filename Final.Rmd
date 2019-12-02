@@ -113,7 +113,11 @@ p <- p %>%
     marker = list(color='yellow'),
     showlegend = F,
     width = 0.3
-  ) %>% layout(xaxis = list(autotick = F, dtick = 1)) 
+  ) %>% layout(xaxis = list(autotick = F, dtick = 1)) %>%
+  layout(title = 'Monthly sale along with yearly holidays in Brazil',
+         xaxis = list(title = 'Time (Year - Month)',
+                      autotick = F, dtick = 1),
+         yaxis = list(title = 'Total Purchase (in $)'))
 
 p
 ```
@@ -167,6 +171,8 @@ payment_group <- payments_data %>% filter(payment_type != "not_defined") %>% gro
 payment_order_group <- payment_group %>% left_join(orders_data) %>% select(order_ID, payment_type, count, order_purchase_timestamp) %>% mutate(purchase_mny = format(strptime(order_purchase_timestamp, "%Y-%m-%d %H:%M:%S"),'%Y-%m'))
 payment_abc <- payment_order_group %>% group_by(purchase_mny, payment_type) %>% summarise(total_count = n())%>% ungroup()
 
-p <- plot_ly(payment_abc, x = ~purchase_mny, y = ~total_count, color = ~payment_type, type = 'scatter', mode = 'lines+markers')
+p <- plot_ly(payment_abc, x = ~purchase_mny, y = ~total_count, color = ~payment_type, type = 'scatter', mode = 'lines+markers') %>% layout(title = 'Payment type growth monthly',
+       xaxis = list(title = 'Time (Year - Month)'),
+       yaxis = list(title = 'Total number of transactions'))
 p
 ```
