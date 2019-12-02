@@ -1,47 +1,39 @@
 ---
-title: "Exploratory and Predictive Analysis of Ecommerce Dataset"
-author: "Aveek Choudhury - Harshita Ved - Priyal Maheshwari - Sarang Pande - Sonal Jain"
-date: "12/2/2019"
-output: 
-  html_document:
-    code_folding: hide
+title: "Project"
+author: "All"
+date: "11/6/2019"
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Overview
+### Libraries
 
-E-commerce is a trending business sector, of electronically buying and selling products over the internet. This fastgrowing industry has also adapted features like online payments, internet marketing, door-step delivery, returns and exchanges, etc. Since it is a widespread industry that adds to human convenience and luxuries, there is a lot of scope for improvements and business growth, which brings profits to both consumers and industry. 
-
-## Understanding the problem
-
-- Analysis on the buying trends of customers and determine if a customer is likely going to buy another product based on what he is currently purchasing
-- Based on the reviews given by the customers, we will be rating the products sold by the store by analyzing the text in the reviews
-- Visualize the sale throughout brazil on maps based on various seasons
-
-## Description of the dataset
-
-This is a Brazilian ecommerce public dataset of orders made at Olist Store. The dataset has information of 100k orders from 2016 to 2018 made at multiple marketplaces in Brazil. The Dataset contains multiple tables providing information on actual ecommerce purchases along with various other dimensions of a particular purchase like Customer Information, Seller Information, Product Metadata as well as Customer reviews on their purchase experience. The dataset also has geolocation file that relates Brazilian zip codes to latitude/longitude coordinates. 
-
-```{r libraries, message=FALSE, include=FALSE}
-# Main Frameworks
+```{r}
 library(ggplot2)
-library(plotly)
-
-# Coding Packages
 library(dplyr)
 library(stringr)
+<<<<<<< Updated upstream
+library(plotly)
 library(lubridate)
+=======
 library(tidyverse)
+library(plotly)
 library(geobr)
 library(rnaturalearth)
 library(rnaturalearthdata)
 library(rgeos)
+library(lubridate)
+
+
+>>>>>>> Stashed changes
 ```
 
-```{r data_reading, message=FALSE, include=FALSE}
+### Data Processing
+
+```{r data_reading}
 customers_data <- read.csv("brazilian-ecommerce/olist_customers_dataset.csv", stringsAsFactors = FALSE)
 geolocation_data <- read.csv("brazilian-ecommerce/olist_geolocation_dataset.csv")
 items_data <- read.csv("brazilian-ecommerce/olist_order_items_dataset.csv")
@@ -50,12 +42,16 @@ reviews_data <- read.csv("brazilian-ecommerce/olist_order_reviews_dataset.csv")
 orders_data <- read.csv("brazilian-ecommerce/olist_orders_dataset.csv")
 products_data <- read.csv("brazilian-ecommerce/olist_products_dataset.csv")
 sellers_data <- read.csv("brazilian-ecommerce/olist_sellers_dataset.csv")
+<<<<<<< Updated upstream
 translations_data <- read.csv("brazilian-ecommerce/product_category_name_translation.csv")
 brazil_holidays_data <- read.csv("brazilian-ecommerce/brazil_holidays.csv")
+=======
+translations_Data <- read.csv("brazilian-ecommerce/product_category_name_translation.csv")
 state <- read_state(code_state="all", year=2018) 
+>>>>>>> Stashed changes
 ```
 
-```{r functions, message=FALSE, results='hide', include=FALSE}
+```{r data_cleaning}
 create_column_mapping <- function(old_column, new_column, dataframe, filename) {
   if(new_column %in% colnames(dataframe))
   {
@@ -81,9 +77,6 @@ implement_mapping <- function(dataframe, column_name){
   return(df)
 }
 
-```
-
-```{r data_cleaning, message=FALSE, results='hide', include=FALSE}
 customers_data <- create_column_mapping("customer_id", "customer_ID", customers_data, "brazilian-ecommerce/olist_customers_translation_dataset.csv")
 orders_data <- create_column_mapping("order_id", "order_ID", orders_data, "brazilian-ecommerce/olist_orders_translation_dataset.csv")
 products_data <- create_column_mapping("product_id", "product_ID", products_data, "brazilian-ecommerce/olist_products_translation_dataset.csv")
@@ -96,9 +89,22 @@ items_data <- implement_mapping(items_data, "order_id")
 orders_data <- implement_mapping(orders_data, "customer_id")
 items_data <- implement_mapping(items_data, "product_id")
 items_data <- implement_mapping(items_data, "seller_id")
+```
 
+### Data Manipulation
+
+```{r data_manipulation}
+
+```
+
+### Exploratory Data Analysis
+```{r sonal}
+<<<<<<< Updated upstream
+custtable <- left_join(customers_data, orders_data)
+qahm
+=======
 geo_data <-  distinct(geolocation_data,geolocation_state,geolocation_zip_code_prefix,geolocation_city, .keep_all = TRUE)
-ordertable <- left_join(orders_data,customers_data)
+ordertable <- plyr::join(orders_data,customers_data, by= "customer_ID")
 ordergeotable <- left_join(ordertable,geo_data, by= c("customer_zip_code_prefix"="geolocation_zip_code_prefix","customer_state"="geolocation_state", "customer_city"="geolocation_city"))
 
 ordertable <- separate(ordertable,order_delivered_customer_date , into=c("deldate", "deltime"), sep=" ")
@@ -108,35 +114,34 @@ ordertable <- separate(ordertable,order_delivered_carrier_date , into=c("delcarr
 ordertable <- separate(ordertable,order_estimated_delivery_date , into=c("estimateddeldate", "estimateddeltime"), sep=" ")
 ordertable <- separate(ordertable, deldate , into=c("year", "month", "date"), sep="-")
 ordertable <- separate(ordertable, purchasedate , into=c("year", "month", "date"), sep="-")
-```
 
-## Order status of customers of each state
+#plot 1
 
-```{r Sonal1, message = FALSE, warning=FALSE}
+#ploting the order status of customers of each state using the bar graph
 custplot <- ordertable  %>%
   filter(order_status %in% c("delivered", "canceled"))%>%
   ggplot(aes(x=customer_state, fill=order_status)) +
   geom_bar(show.legend=FALSE)+facet_wrap(~order_status, scales = "free")+
   labs(x="Customer states in brazil", y="No. of orders of different status for customers in different states" , title = "Order status plot of customers of different state")
 ggplotly(custplot)
-```
 
-## Add Title
+#plot 2
 
-```{r Sonal2, message = FALSE, warning=FALSE}
+
 g <- ggplot() + 
   geom_sf(data=state, fill="#2D3E50", color="#FEBF57", size=.15, show.legend = FALSE) 
+print(g)
 #all states
 a <- g + geom_point(ordergeotable, mapping = aes(x=geolocation_lng, y=geolocation_lat, color = customer_state), position = "jitter", size=.15, alpha=1/2)+
-  coord_sf(xlim = c(-75,-30), ylim = c(-40,5), expand = FALSE)+
+  coord_sf(xlim = c(-70,-30), ylim = c(-40,5), expand = FALSE)+
   labs(y="Latitude of location.", x="Longitude of location.",title="Mapping of different states of brazil in Map")
 
 plot(a)
-```
 
-## Add Title
+#plot 3
+## Customer Repetition
 
-```{r Sonal3, message = FALSE, warning=FALSE}
+# add column for purchase year
 freq_count <- as.data.frame(table(ordertable$customer_unique_id))
 odtbl <- ordertable %>% select_at(vars(year, month, customer_unique_id)) %>%
   distinct_at(vars(year,month, customer_unique_id)) %>% 
@@ -145,43 +150,44 @@ odtbl <- ordertable %>% select_at(vars(year, month, customer_unique_id)) %>%
   ggplot() + geom_line(mapping = aes(x = month, y = n, group = 1, color="red"),show.legend = FALSE) +facet_wrap(~year)+geom_point(mapping = aes(x = month, y = n, group = 1, color="red",show.legend=FALSE),show.legend = FALSE)+labs(x="Month", y="Count of new customers added each month", title = "New customers purchased every consecutive month")
 
 ggplotly(odtbl)
+>>>>>>> Stashed changes
+
 ```
 
-## Overall sales based on holidays
+```{r Priyal}
 
-```{r Sarang1, message=FALSE, warning=FALSE}
-a <- items_data %>% left_join(orders_data) %>% mutate(mny = format(strptime(order_purchase_timestamp, "%Y-%m-%d %H:%M:%S"),'%Y-%m')) %>% group_by(mny) %>% summarise(total = sum(price)) %>% arrange(mny)
+```
 
-brazil_holidays <- brazil_holidays_data %>% mutate(mny = strftime(Date, format = "%Y-%m")) %>% group_by(mny) %>% mutate(holidays_by_week = paste0(Holiday, collapse = ",")) %>% select(mny, holidays_by_week)
 
-brazil_holidays <- brazil_holidays[!duplicated(brazil_holidays$mny),]
+```{r Harshita}
 
-p <- plot_ly(a, x = ~mny, y = ~total, type = 'scatter', mode = 'lines')
+```
+
+```{r Sarang1}
+a <- items_data %>% left_join(orders_data) %>% mutate(week = strftime(order_purchase_timestamp, format = "%V")) %>% group_by(week) %>% summarise(total = sum(price)) %>% arrange(week)
+
+brazil_holidays <- brazil_holidays_data %>% mutate(Week = strftime(Date, format = "%V")) %>% group_by(Week) %>% mutate(holidays_by_week = paste0(Holiday, collapse = ",")) %>% select(Week, holidays_by_week)
+
+brazil_holidays <- brazil_holidays[!duplicated(brazil_holidays$Week),]
+
+p <- plot_ly(a, x = ~week, y = ~total, type = 'scatter', mode = 'lines')
 
 p <- p %>%
   add_trace(
     type = 'bar',
-    x = brazil_holidays$mny, 
-    y = 1000000,
+    x = brazil_holidays$Week, 
+    y = 450000,
     text = brazil_holidays$holidays_by_week,
     hoverinfo = 'text',
     marker = list(color='yellow'),
     showlegend = F,
     width = 0.3
-  ) %>% layout(xaxis = list(autotick = F, dtick = 1)) %>%
-  layout(title = 'Monthly sale along with yearly holidays in Brazil',
-         xaxis = list(title = 'Time (Year - Month)',
-                      autotick = F, dtick = 1),
-         yaxis = list(title = 'Total Purchase (in $)'))
+  ) %>% layout(xaxis = list(autotick = F, dtick = 1)) 
 
 p
 ```
 
-Clearly, the sale increases significantly when there is an event during a particular month.
-
-## Hour by day transactions
-
-```{r Sarang2, message=FALSE, warning=FALSE}
+```{r Sarang2}
 order_weekday <- orders_data %>% mutate(purchase_weekday = wday(order_purchase_timestamp), purchase_hour = format(strptime(order_purchase_timestamp, "%Y-%m-%d %H:%M:%S"),'%H')) %>%  group_by(purchase_weekday, purchase_hour) %>% summarise(total_transactions = n())
 
 p <- plot_ly(data = order_weekday, 
@@ -200,11 +206,8 @@ p <- plot_ly(data = order_weekday,
 p
 ```
 
-The heatmap indiciates that the majority of the transactions occur over the weekdays during office hours. We can thus increases our marketing strategies during this period.
 
-## Total payment vs Total Transactions based on payment methods
-
-```{r Sarang3, message=FALSE, warning=FALSE}
+```{r Sarang3}
 payment_sum <- payments_data %>% filter(payment_type != "not_defined") %>% group_by(payment_type) %>% summarise(sum = sum(payment_value))
 payment_count <- payments_data %>% filter(payment_type != "not_defined") %>% group_by(payment_type) %>% summarise(count = n())
 p <- plot_ly() %>%
@@ -217,17 +220,11 @@ yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
 p
 ```
 
-The market in brazil is heavily dominated by credit card payments. Credit cards are used in ~74% of the total transactions amounting to ~78% of the total market revenue for Olist.
-
-## Payment type growth analysis 
-
-```{r Sarang4, message=FALSE, warning=FALSE}
+```{r Sarang4}
 payment_group <- payments_data %>% filter(payment_type != "not_defined") %>% group_by(order_ID, payment_type) %>% summarise(count = n())
 payment_order_group <- payment_group %>% left_join(orders_data) %>% select(order_ID, payment_type, count, order_purchase_timestamp) %>% mutate(purchase_mny = format(strptime(order_purchase_timestamp, "%Y-%m-%d %H:%M:%S"),'%Y-%m'))
 payment_abc <- payment_order_group %>% group_by(purchase_mny, payment_type) %>% summarise(total_count = n())%>% ungroup()
 
-p <- plot_ly(payment_abc, x = ~purchase_mny, y = ~total_count, color = ~payment_type, type = 'scatter', mode = 'lines+markers') %>% layout(title = 'Payment type growth monthly',
-       xaxis = list(title = 'Time (Year - Month)'),
-       yaxis = list(title = 'Total number of transactions'))
+p <- plot_ly(payment_abc, x = ~purchase_mny, y = ~total_count, color = ~payment_type, type = 'scatter', mode = 'lines+markers')
 p
 ```
