@@ -16,7 +16,14 @@ library(ggplot2)
 library(dplyr)
 library(stringr)
 library(plotly)
+library(tidyverse)
+library(geobr)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(rgeos)
 library(lubridate)
+
+
 ```
 
 ### Data Processing
@@ -32,6 +39,7 @@ products_data <- read.csv("brazilian-ecommerce/olist_products_dataset.csv")
 sellers_data <- read.csv("brazilian-ecommerce/olist_sellers_dataset.csv")
 translations_data <- read.csv("brazilian-ecommerce/product_category_name_translation.csv")
 brazil_holidays_data <- read.csv("brazilian-ecommerce/brazil_holidays.csv")
+state <- read_state(code_state="all", year=2018) 
 ```
 
 ```{r data_cleaning}
@@ -82,8 +90,53 @@ items_data <- implement_mapping(items_data, "seller_id")
 
 ### Exploratory Data Analysis
 ```{r sonal}
-custtable <- left_join(customers_data, orders_data)
-qahm
+geo_data <-  distinct(geolocation_data,geolocation_state,geolocation_zip_code_prefix,geolocation_city, .keep_all = TRUE)
+ordertable <- plyr::join(orders_data,customers_data, by= "customer_ID")
+ordergeotable <- left_join(ordertable,geo_data, by= c("customer_zip_code_prefix"="geolocation_zip_code_prefix","customer_state"="geolocation_state", "customer_city"="geolocation_city"))
+
+ordertable <- separate(ordertable,order_delivered_customer_date , into=c("deldate", "deltime"), sep=" ")
+ordertable <- separate(ordertable,order_purchase_timestamp , into=c("purchasedate", "purchasetime"), sep=" ")
+ordertable <- separate(ordertable,order_approved_at , into=c("approveddate", "approvedtime"), sep=" ")
+ordertable <- separate(ordertable,order_delivered_carrier_date , into=c("delcarrierdate", "delcarriertime"), sep=" ")
+ordertable <- separate(ordertable,order_estimated_delivery_date , into=c("estimateddeldate", "estimateddeltime"), sep=" ")
+ordertable <- separate(ordertable, deldate , into=c("year", "month", "date"), sep="-")
+ordertable <- separate(ordertable, purchasedate , into=c("year", "month", "date"), sep="-")
+
+#plot 1
+
+#ploting the order status of customers of each state using the bar graph
+custplot <- ordertable  %>%
+  filter(order_status %in% c("delivered", "canceled"))%>%
+  ggplot(aes(x=customer_state, fill=order_status)) +
+  geom_bar(show.legend=FALSE)+facet_wrap(~order_status, scales = "free")+
+  labs(x="Customer states in brazil", y="No. of orders of different status for customers in different states" , title = "Order status plot of customers of different state")
+ggplotly(custplot)
+
+#plot 2
+
+
+g <- ggplot() + 
+  geom_sf(data=state, fill="#2D3E50", color="#FEBF57", size=.15, show.legend = FALSE) 
+print(g)
+#all states
+a <- g + geom_point(ordergeotable, mapping = aes(x=geolocation_lng, y=geolocation_lat, color = customer_state), position = "jitter", size=.15, alpha=1/2)+
+  coord_sf(xlim = c(-70,-30), ylim = c(-40,5), expand = FALSE)+
+  labs(y="Latitude of location.", x="Longitude of location.",title="Mapping of different states of brazil in Map")
+
+plot(a)
+
+#plot 3
+## Customer Repetition
+
+# add column for purchase year
+freq_count <- as.data.frame(table(ordertable$customer_unique_id))
+odtbl <- ordertable %>% select_at(vars(year, month, customer_unique_id)) %>%
+  distinct_at(vars(year,month, customer_unique_id)) %>% 
+  arrange_at(vars(year, month)) %>% 
+  count_(vars(year, month)) %>% 
+  ggplot() + geom_line(mapping = aes(x = month, y = n, group = 1, color="red"),show.legend = FALSE) +facet_wrap(~year)+geom_point(mapping = aes(x = month, y = n, group = 1, color="red",show.legend=FALSE),show.legend = FALSE)+labs(x="Month", y="Count of new customers added each month", title = "New customers purchased every consecutive month")
+
+ggplotly(odtbl)
 
 ```
 
